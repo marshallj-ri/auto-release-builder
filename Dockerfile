@@ -6,10 +6,10 @@ LABEL "com.github.actions.description" = "Action to create a Github Release"
 LABEL "com.github.actions.icon"="git-merge"
 LABEL "com.github.actions.color"="gray-dark"
 
-LABEL "repository" = "https://github.com/reapit/auto-release-builder"
+LABEL "repository" = "https://github.com/marshallj-ri/auto-release-builder"
 
-LABEL "homepage" = "https://github.com/reapit/auto-release-builder"
-LABEL "maintainer"="Reapit"
+LABEL "homepage" = "https://github.com/marshallj-ri/auto-release-builder"
+LABEL "maintainer"="marshallj-ri"
 
 RUN apt-get update && apt-get install -y \
 	--no-install-recommends \
