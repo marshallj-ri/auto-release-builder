@@ -33,38 +33,6 @@ request_create_release(){
 	  --data "$json_body"
 }
 
-request_create_ticket(){
-	local json_body='{
-		"fields": {
-			"project": {
-				"key":"SI"
-			},
-			"summary": "ARB: Deploy @release_name@ to @environment@",
-			"description": "https://github.com/reapit/rpw/releases/tag/@tag@\nPlease deploy to:\n/webservice/release-groups/@environment@/\n/web/release-groups/@environment@/\n/tracker/release-groups/@environment@/\n/rda/release-groups/@environment@/\n/services/release-groups/@environment@/\n/propertypulse/release-groups/@environment@",
-			"issuetype":
-				{
-					"name": "Deployment"
-				}
-		}	
-	}'
-	
-	if [[ $prerelease ]]; then
-		local environment='test'
-	else 
-		local environment='live'
-	fi
-	
-	json_body=$(echo "$json_body" | sed "s/@tag@/$git_tag/")
-	json_body=$(echo "$json_body" | sed "s/@release_name@/$release_name/")
-	json_body=$(echo "$json_body" | sed "s/@environment@/$environment/g")
-	
-	curl --request POST \
-		--url 'https://reapit.atlassian.net/rest/api/2/issue' \
-		--user "${JIRA_USER}:${JIRA_API_KEY}" \
-		--header 'Accept: application/json' \
-		--header 'Content-Type: application/json' \
-		--data "$json_body"
-}
 
 increment_version ()
 {
@@ -91,7 +59,7 @@ if [[ -z "$GITHUB_TOKEN" ]]; then
 fi
 if [[ ${GITHUB_REF} = "refs/heads/master" || ${GITHUB_REF} = "refs/heads/development" ]]; then
 	branch=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
-	last_tag_number=$(git describe --tags $(git rev-list --tags --max-count=1))
+	last_tag_number=$(git tag -l --sort -version:refname)
 	echo "The last tag number was: $last_tag_number"
 	if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 		prerelease=true
@@ -132,7 +100,6 @@ if [[ ${GITHUB_REF} = "refs/heads/master" || ${GITHUB_REF} = "refs/heads/develop
 	git_tag="${new_tag}"
 	release_name="${new_tag//RC/ Release Candidate }"
 	request_create_release
-	request_create_ticket
 else
 	echo "This Action run only in master or development branch"
 	exit 0
