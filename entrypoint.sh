@@ -33,6 +33,11 @@ request_create_release(){
 	  --data "$json_body"
 }
 
+get_rc()
+{
+  declare -a verArr=( ${1//[\.,RC]/ } )
+    echo ${verArr[3]}
+}
 
 increment_version ()
 {
@@ -57,43 +62,21 @@ if [[ -z "$GITHUB_TOKEN" ]]; then
   echo "Set the GITHUB_TOKEN env variable."
   exit 1
 fi
-if [[ ${GITHUB_REF} = "refs/heads/master" || ${GITHUB_REF} = "refs/heads/development" ]]; then
+if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 	branch=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
-	last_tag_number=$(git tag -l --sort -version:refname)
+	last_tag_number=$(git tag -l 4.* --sort -version:refname)
 	echo "The last tag number was: $last_tag_number"
 	if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 		prerelease=true
 	
 		# Create new tag.
 		if [[ $last_tag_number == *"RC"* ]]; then
-			current_rc_version="${last_tag_number: -1}"
+			current_rc_version=$(get_rc $last_tag_number)
 			next_rc_version=$((current_rc_version+1))
 			new_tag="${last_tag_number::-1}$next_rc_version"
 		else
 			new_version=$(increment_version $last_tag_number)
 			new_tag="${new_version}RC1"
-		fi	
-	else
-		prerelease=false
-		echo "LOG: Merging into Master branch"
-		if [[ $last_tag_number == *"RC"* ]]; then
-			modified_tag="${last_tag_number%RC*}"
-			new_tag=$modified_tag
-			echo "The last tag was an RC version"
-			echo "The new tag and release is: $new_tag"
-		else
-			new_tag=$(increment_version $last_tag_number)
-			echo "The last tag was not an RC version"
-			echo "The new tag and release is: $new_tag"
-		fi
-		
-		last_commit=$(git log -1 --pretty=%B)
-		echo "The last commit was: $last_commit"
-		if [[ -n "$last_commit" && "$last_commit" == *"hotfix-"* ]]; then
-			#Hotfixes will remain a manual process as they are a rare occurance
-			#It would also make this automation very combersome.
-			echo "LOG: Release cancelled as change is a hot fix and should be done manually"
-			exit 0
 		fi
 	fi
 
