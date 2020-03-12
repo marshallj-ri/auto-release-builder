@@ -68,7 +68,7 @@ if [[ -z "$GITHUB_TOKEN" ]]; then
 fi
 if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 	branch=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
-	last_tag_number=$(git tag -l 4.* --sort -version:refname $(git rev-list --tags --max-count=1))
+	last_tag_number=$(git tag -l 4.* --sort -version:refname | head -1)
 	echo "The last tag number was: $last_tag_number"
 	if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 		prerelease=true
