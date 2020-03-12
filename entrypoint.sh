@@ -75,8 +75,6 @@ if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 	
 		# Create new tag.
 		if [[ $last_tag_number == *"RC"* ]]; then
-			echo "is rc"
-			echo "$last_tag_number end"
 			current_rc_version=$(get_rc $last_tag_number)
 			declare -i next_rc_version=$current_rc_version+1
 			echo $next_rc_version
@@ -85,7 +83,6 @@ if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 			echo $new_tag
 			echo "The new tag number is: $new_tag"
 		else
-			echo "is not rc"
 			new_version=$(increment_version $last_tag_number)
 			new_tag="${new_version}RC1"
 			echo "The new tag number is: $new_tag"
