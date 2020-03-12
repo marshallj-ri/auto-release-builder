@@ -39,6 +39,12 @@ get_rc()
     echo ${verArr[3]}
 }
 
+get_version_from_tag()
+{
+  declare -a verArr=( ${1//[\.,RC]/ } )
+	echo ${verArr[0]}.${verArr[1]}.${verArr[2]}
+}
+
 increment_version ()
 {
   declare -a part=( ${1//\./ } )
@@ -72,16 +78,24 @@ if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 		# Create new tag.
 		if [[ $last_tag_number == *"RC"* ]]; then
 			current_rc_version=$(get_rc $last_tag_number)
-			next_rc_version=$((current_rc_version+1))
-			new_tag="${last_tag_number::-1}$next_rc_version"
+			declare -i next_rc_version=$current_rc_version+1
+			echo $next_rc_version
+			version="$(get_version_from_tag $last_tag_number)"
+			new_tag="${version}RC${next_rc_version}"
+			echo $new_tag
+			echo "The new tag number is: $new_tag"
 		else
 			new_version=$(increment_version $last_tag_number)
 			new_tag="${new_version}RC1"
+			echo "The new tag number is: $new_tag"
 		fi
 	fi
 
+	echo "The new git tag number is: $new_tag"
 	git_tag="${new_tag}"
+	echo ${git_tag}
 	release_name="${new_tag//RC/ Release Candidate }"
+	echo ${release_name}
 	request_create_release
 else
 	echo "This Action run only in master or development branch"
