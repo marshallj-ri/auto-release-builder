@@ -108,6 +108,6 @@ if [[ ${GITHUB_REF} = "refs/heads/development" ]]; then
 	echo "New Release Name: ${release_name}"
 	request_create_release
 else
-	echo "This Action run only in master or development branch"
+	echo "This Action runs only for the development branch"
 	exit 0
 fi
